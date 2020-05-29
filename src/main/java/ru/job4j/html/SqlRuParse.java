@@ -8,26 +8,51 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
  * Парсинг страницы сайта https://www.sql.ru
  */
 public class SqlRuParse {
-    public static void main(String[] args) throws IOException {
-        Document document = Jsoup.connect("https://www.sql.ru/forum/job-offers").get();
-        Elements rows = document.select(".postslisttopic");
-        for (Element row : rows) {
-            Element href = row.child(0);
+    public static void main(String[] args) {
+        SqlRuParse parser = new SqlRuParse();
+        List<Element> topics = new ArrayList<>();
+        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
+        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/2"));
+        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/3"));
+        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/4"));
+        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/5"));
+        for (Element topic : topics) {
+            Element href = topic.child(0);
             System.out.println(href.attr("href"));
             System.out.println(href.text());
-            Element date = row.parent().child(5);
+            Element date = topic.parent().child(5);
             System.out.println(date.text());
-            System.out.println(parseDate(date.text()));
-            Instant instant = Instant.ofEpochMilli(parseDate(date.text()));
+            System.out.println(parser.parseDate(date.text()));
+            Instant instant = Instant.ofEpochMilli(parser.parseDate(date.text()));
             System.out.println(instant);
             System.out.println();
         }
+    }
+
+    /**
+     * Метод для получения списка топиков с вакансиями по ссылке на страницу с сайта sql.ru
+     *
+     * @param url ссылка на страницу раздела вакансий.
+     * @return список топиков.
+     */
+    public List<Element> getTopics(String url) {
+        ArrayList<Element> result = new ArrayList<>();
+        try {
+            Document document = Jsoup.connect(url).get();
+            Elements rows = document.select(".postslisttopic");
+            result.addAll(rows);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     /**
@@ -36,7 +61,7 @@ public class SqlRuParse {
      * @param textDate дата формата sql.ru
      * @return unix-time
      */
-    public static long parseDate(String textDate) {
+    public long parseDate(String textDate) {
         long result;
         Scanner byComma = new Scanner(textDate).useDelimiter(",");
         String stringDate = byComma.next();
@@ -68,7 +93,7 @@ public class SqlRuParse {
      * @param month месяц в текстовом формате sql.ru.
      * @return число, обозначающее месяц.
      */
-    public static String getMonthNumber(String month) {
+    public String getMonthNumber(String month) {
         String result;
         switch (month) {
             case "янв":
