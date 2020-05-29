@@ -72,4 +72,24 @@ public class SqlRuParseTest {
         Assert.assertThat(resultUrl, is("https://www.sql.ru/forum/484798/pravila-foruma"));
         Assert.assertThat(resultSummary, is("Правила форума"));
     }
+
+    /**
+     * Здесь проверяется получение номера месяца по его названию.
+     */
+    @Test
+    public void whenGetMonthThenGetCorrect() {
+        SqlRuParse parser = new SqlRuParse();
+        Assert.assertThat(parser.getMonthNumber("янв"), is("01"));
+        Assert.assertThat(parser.getMonthNumber("фев"), is("02"));
+        Assert.assertThat(parser.getMonthNumber("мар"), is("03"));
+        Assert.assertThat(parser.getMonthNumber("апр"), is("04"));
+        Assert.assertThat(parser.getMonthNumber("май"), is("05"));
+        Assert.assertThat(parser.getMonthNumber("июн"), is("06"));
+        Assert.assertThat(parser.getMonthNumber("июл"), is("07"));
+        Assert.assertThat(parser.getMonthNumber("авг"), is("08"));
+        Assert.assertThat(parser.getMonthNumber("сен"), is("09"));
+        Assert.assertThat(parser.getMonthNumber("окт"), is("10"));
+        Assert.assertThat(parser.getMonthNumber("ноя"), is("11"));
+        Assert.assertThat(parser.getMonthNumber("дек"), is("12"));
+    }
 }
