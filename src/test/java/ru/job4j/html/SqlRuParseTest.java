@@ -92,4 +92,57 @@ public class SqlRuParseTest {
         Assert.assertThat(parser.getMonthNumber("ноя"), is("11"));
         Assert.assertThat(parser.getMonthNumber("дек"), is("12"));
     }
+
+    /**
+     * Здесь проверяется получение времени последнего обновления поста из топика.
+     */
+    @Test
+    public void whenGetLastUpdateTimeFromTopicThenGetCorrect() {
+        SqlRuParse parser = new SqlRuParse();
+        List<Element> topics = new ArrayList<>(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
+        Element firstTopic = topics.get(0);
+        long result = parser.parseTopicForLastUpdateDate(firstTopic);
+        long expected = 1575325740000L;
+        Assert.assertThat(result, is(expected));
+    }
+
+    /**
+     * Здесь проверяется получение ссылки на пост из топика.
+     */
+    @Test
+    public void whenGetUrlFromTopicThenGetCorrect() {
+        SqlRuParse parser = new SqlRuParse();
+        List<Element> topics = new ArrayList<>(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
+        Element firstTopic = topics.get(0);
+        String result = parser.parseTopicForUrl(firstTopic);
+        String expected = "https://www.sql.ru/forum/484798/pravila-foruma";
+        Assert.assertThat(result, is(expected));
+    }
+
+    /**
+     * Здесь проверяется получение объекта поста по ссылке на топик.
+     */
+    @Test
+    public void whenGetPostFromTopicThenGetCorrect() {
+        SqlRuParse parser = new SqlRuParse();
+        List<Element> topics = new ArrayList<>(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
+        Element firstTopic = topics.get(0);
+        String url = parser.parseTopicForUrl(firstTopic);
+        long updateTime = parser.parseTopicForLastUpdateDate(firstTopic);
+        SqlRuPost post = parser.getPost(url, updateTime);
+        String expectedUrl = "https://www.sql.ru/forum/484798/pravila-foruma";
+        String expectedAuthor = "judge";
+        String expectedSummary = "Правила форума";
+        String expectedDescription = "Правилами форума временно считаются "
+                + "правила форума Работа связанные с публикацией вакансий. "
+                + "Сообщение было отредактировано: 17 окт 07, 11:30";
+        long expectedCreated = 1192585740000L;
+        long expectedUpdated = 1575325740000L;
+        Assert.assertThat(post.getUrl(), is(expectedUrl));
+        Assert.assertThat(post.getAuthor(), is(expectedAuthor));
+        Assert.assertThat(post.getSummary(), is(expectedSummary));
+        Assert.assertThat(post.getDescription(), is(expectedDescription));
+        Assert.assertThat(post.getCreateDate(), is(expectedCreated));
+        Assert.assertThat(post.getLastUpdateDate(), is(expectedUpdated));
+    }
 }
