@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Класс, описывающий модель данных для топика sql.ru.
+ * Класс, реализующий модель данных для топика sql.ru.
  */
-public class SqlRuPost {
+public class SqlRuPost implements Post {
     private String summary;
     private String description;
     private String author;

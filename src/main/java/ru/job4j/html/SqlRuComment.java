@@ -3,7 +3,7 @@ package ru.job4j.html;
 import java.util.Objects;
 
 /**
- * Класс, описывающий модель данных для комментария к посту sql.ru.
+ * Класс, реализующий модель данных для комментария к посту sql.ru.
  */
 public class SqlRuComment {
     private String text;

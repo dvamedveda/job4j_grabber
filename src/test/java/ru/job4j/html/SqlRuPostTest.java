@@ -28,6 +28,21 @@ public class SqlRuPostTest {
     }
 
     /**
+     * Здесь провреяется сравнение поста с null.
+     */
+    @Test
+    public void whenCompareWithNullThenNotEquals() {
+        SqlRuPost post = new SqlRuPost();
+        post.setUrl("https://www.sql.ru/forum/484798/pravila-foruma");
+        post.setAuthor("author");
+        post.setSummary("summary");
+        post.setDescription("description");
+        post.setCreateDate(0L);
+        post.setLastUpdateDate(0L);
+        Assert.assertThat(post.equals(null), is(false));
+    }
+
+    /**
      * Проверка сравнения поста с другим постом.
      */
     @Test

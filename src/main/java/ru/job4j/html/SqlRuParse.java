@@ -15,30 +15,7 @@ import java.util.Scanner;
 /**
  * Парсинг страницы сайта https://www.sql.ru
  */
-public class SqlRuParse {
-    public static void main(String[] args) {
-        SqlRuParse parser = new SqlRuParse();
-        List<Element> topics = new ArrayList<>();
-        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
-        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/2"));
-        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/3"));
-        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/4"));
-        topics.addAll(parser.getTopics("https://www.sql.ru/forum/job-offers/5"));
-        for (Element topic : topics) {
-            String topicUrl = parser.parseTopicForUrl(topic);
-            long lastUpdateDate = parser.parseTopicForLastUpdateDate(topic);
-            SqlRuPost post = parser.getPost(topicUrl, lastUpdateDate);
-            System.out.println(post.getUrl());
-            System.out.println(post.getAuthor());
-            System.out.println(post.getCreateDate());
-            System.out.println(Instant.ofEpochMilli(post.getCreateDate()));
-            System.out.println(post.getSummary());
-            System.out.println(post.getDescription());
-            System.out.println(post.getLastUpdateDate());
-            System.out.println(Instant.ofEpochMilli(post.getLastUpdateDate()));
-            System.out.println("----------------------------------------");
-        }
-    }
+public class SqlRuParse implements Parse {
 
     /**
      * Метод для получения ссылки на пост из топика.
@@ -46,7 +23,7 @@ public class SqlRuParse {
      * @param topic элемент топика.
      * @return ссылка на пост с комментариями.
      */
-    public String parseTopicForUrl(Element topic) {
+    private String parseTopicForUrl(Element topic) {
         String result = "";
         Element href = topic.child(0);
         result = href.attr("href");
@@ -59,7 +36,7 @@ public class SqlRuParse {
      * @param topic элемент топика.
      * @return время последнего обновления поста.
      */
-    public long parseTopicForLastUpdateDate(Element topic) {
+    private long parseTopicForLastUpdateDate(Element topic) {
         long result;
         Element lastUpdateDate = topic.parent().child(5);
         result = this.parseDate(lastUpdateDate.text());
@@ -67,17 +44,19 @@ public class SqlRuParse {
     }
 
     /**
-     * Метод для получения списка топиков с вакансиями по ссылке на страницу с сайта sql.ru
+     * Метод для получения списка постов с вакансиями по ссылке на страницу с топиками с сайта sql.ru
      *
-     * @param url ссылка на страницу раздела вакансий.
-     * @return список топиков.
+     * @param url ссылка на страницу топиков раздела вакансий.
+     * @return список постов.
      */
-    public List<Element> getTopics(String url) {
-        ArrayList<Element> result = new ArrayList<>();
+    public List<Post> list(String url) {
+        ArrayList<Post> result = new ArrayList<>();
         try {
             Document document = Jsoup.connect(url).get();
-            Elements rows = document.select(".postslisttopic");
-            result.addAll(rows);
+            Elements topics = document.select(".postslisttopic");
+            for (Element topic : topics) {
+                result.add(detail(parseTopicForUrl(topic), parseTopicForLastUpdateDate(topic)));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,13 +64,13 @@ public class SqlRuParse {
     }
 
     /**
-     * Метод для получения объекта поста из топика.
+     * Метод для получения объекта поста по ссылке.
      *
      * @param url            ссылка на пост из топика.
      * @param lastUpdateDate время последнего обновления поста для добавления в объект поста.
      * @return объект поста.
      */
-    public SqlRuPost getPost(String url, long lastUpdateDate) {
+    public Post detail(String url, long lastUpdateDate) {
         SqlRuPost result = new SqlRuPost();
         try {
             Document document = Jsoup.connect(url).get();

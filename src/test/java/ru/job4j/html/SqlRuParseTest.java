@@ -1,6 +1,5 @@
 package ru.job4j.html;
 
-import org.jsoup.nodes.Element;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -60,20 +59,6 @@ public class SqlRuParseTest {
     }
 
     /**
-     * Здесь проверяется получение топиков с первой страницы раздела вакансий sql.ru.
-     */
-    @Test
-    public void whenGetTopicsFromFirstPageThenGetCorrect() {
-        SqlRuParse parser = new SqlRuParse();
-        List<Element> topics = new ArrayList<>(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
-        Element href = topics.get(0).child(0);
-        String resultUrl = href.attr("href");
-        String resultSummary = href.text();
-        Assert.assertThat(resultUrl, is("https://www.sql.ru/forum/484798/pravila-foruma"));
-        Assert.assertThat(resultSummary, is("Правила форума"));
-    }
-
-    /**
      * Здесь проверяется получение номера месяца по его названию.
      */
     @Test
@@ -94,42 +79,13 @@ public class SqlRuParseTest {
     }
 
     /**
-     * Здесь проверяется получение времени последнего обновления поста из топика.
-     */
-    @Test
-    public void whenGetLastUpdateTimeFromTopicThenGetCorrect() {
-        SqlRuParse parser = new SqlRuParse();
-        List<Element> topics = new ArrayList<>(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
-        Element firstTopic = topics.get(0);
-        long result = parser.parseTopicForLastUpdateDate(firstTopic);
-        long expected = 1575325740000L;
-        Assert.assertThat(result, is(expected));
-    }
-
-    /**
-     * Здесь проверяется получение ссылки на пост из топика.
-     */
-    @Test
-    public void whenGetUrlFromTopicThenGetCorrect() {
-        SqlRuParse parser = new SqlRuParse();
-        List<Element> topics = new ArrayList<>(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
-        Element firstTopic = topics.get(0);
-        String result = parser.parseTopicForUrl(firstTopic);
-        String expected = "https://www.sql.ru/forum/484798/pravila-foruma";
-        Assert.assertThat(result, is(expected));
-    }
-
-    /**
      * Здесь проверяется получение объекта поста по ссылке на топик.
      */
     @Test
     public void whenGetPostFromTopicThenGetCorrect() {
         SqlRuParse parser = new SqlRuParse();
-        List<Element> topics = new ArrayList<>(parser.getTopics("https://www.sql.ru/forum/job-offers/1"));
-        Element firstTopic = topics.get(0);
-        String url = parser.parseTopicForUrl(firstTopic);
-        long updateTime = parser.parseTopicForLastUpdateDate(firstTopic);
-        SqlRuPost post = parser.getPost(url, updateTime);
+        List<Post> posts = new ArrayList<>(parser.list("https://www.sql.ru/forum/job-offers/1"));
+        Post post = posts.get(0);
         String expectedUrl = "https://www.sql.ru/forum/484798/pravila-foruma";
         String expectedAuthor = "judge";
         String expectedSummary = "Правила форума";

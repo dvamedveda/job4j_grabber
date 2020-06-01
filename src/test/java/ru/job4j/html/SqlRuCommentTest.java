@@ -37,4 +37,16 @@ public class SqlRuCommentTest {
         comment2.setDate(2L);
         Assert.assertThat(comment1.equals(comment2), is(false));
     }
+
+    /**
+     * Сравнение комментария с null.
+     */
+    @Test
+    public void whenCompareWithNullThenNotEquals() {
+        SqlRuComment comment = new SqlRuComment();
+        comment.setAuthor("author");
+        comment.setText("text");
+        comment.setDate(0L);
+        Assert.assertThat(comment.equals(null), is(false));
+    }
 }
