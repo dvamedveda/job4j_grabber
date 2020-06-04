@@ -1,5 +1,6 @@
 package ru.job4j.store;
 
+import org.postgresql.util.PSQLException;
 import ru.job4j.html.Post;
 import ru.job4j.html.SqlRuPost;
 
@@ -71,6 +72,9 @@ public class PgSqlStore implements Store, AutoCloseable {
             statement.setString(5, post.getUrl());
             statement.setString(6, post.getDescription());
             statement.executeUpdate();
+            System.out.println("Added one new post");
+        } catch (PSQLException e) {
+            System.out.println("Try to adding already existing post, skipping it.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
