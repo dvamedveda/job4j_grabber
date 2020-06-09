@@ -7,6 +7,11 @@ import ru.job4j.html.Post;
 import ru.job4j.store.PgSqlStore;
 import ru.job4j.store.Store;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -86,6 +91,36 @@ public class Grabber implements Grab {
     }
 
     /**
+     * Запуск в отдельном потоке выдачи информации в браузер.
+     * @param store хранилище заявок
+     */
+    public void web(Store store) {
+        Runnable forWeb = new Runnable() {
+            @Override
+            public void run() {
+                int answerPort = Integer.parseInt(properties.getProperty("rabbit.port"));
+                try (ServerSocket serverSocket = new ServerSocket(answerPort)) {
+                    while (!serverSocket.isClosed()) {
+                        Socket socket = serverSocket.accept();
+                        try (OutputStream writer = socket.getOutputStream()) {
+                            writer.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+                            for (Post post : store.getAll()) {
+                                writer.write(post.toString().getBytes(Charset.forName("Windows-1251")));
+                                writer.write(System.lineSeparator().getBytes());
+                            }
+                            writer.flush();
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        Thread runner = new Thread(forWeb);
+        runner.start();
+    }
+
+    /**
      * Внутренний класс, реализующий задачу получения объявлений.
      * Выполняется периодически и сохраняет новые объявления в бд,
      * если они подходят по условиям.
@@ -104,7 +139,8 @@ public class Grabber implements Grab {
             List<Post> posts = new ArrayList<>();
             posts.addAll(parser.list("https://www.sql.ru/forum/job-offers/1"));
             for (Post post : posts) {
-                if (post.getSummary().toLowerCase().contains("java") && !post.getSummary().toLowerCase().contains("script")) {
+                String normalizedSummary = post.getSummary().toLowerCase();
+                if (normalizedSummary.contains("java") && !normalizedSummary.contains("script")) {
                     store.save(post);
                 }
             }

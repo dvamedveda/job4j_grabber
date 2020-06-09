@@ -13,17 +13,19 @@ import ru.job4j.quartz.Database;
 import ru.job4j.quartz.Grabber;
 import ru.job4j.store.Store;
 
-import java.io.IOException;
 import java.sql.Connection;
+import java.util.Properties;
 
 /**
  * Главный класс для запуска приложения Grabber.
  * Он подготавливает базу данных для работы и запускает quartz-job, периодически выполняющий работу.
  */
 public class RunGrabber {
-    public static void main(String[] args) throws SchedulerException, IOException, LiquibaseException {
-        Connection connection = new Database(true).getConnection(Config.loadProperties("rabbit.properties"));
-        liquibase.database.Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+    public static void main(String[] args) throws SchedulerException, LiquibaseException {
+        Properties properties = Config.loadProperties("rabbit.properties");
+        Connection connection = new Database(true).getConnection(properties);
+        liquibase.database.Database database =
+                DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         Liquibase liquibase = new Liquibase("db/master.xml", new FileSystemResourceAccessor(), database);
         liquibase.update("");
         Grabber grabber = new Grabber();
@@ -31,5 +33,6 @@ public class RunGrabber {
         Scheduler scheduler = grabber.scheduler();
         Store store = grabber.store(true);
         grabber.init(new SqlRuParse(), store, scheduler);
+        grabber.web(store);
     }
 }

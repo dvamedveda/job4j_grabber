@@ -1,6 +1,7 @@
 package ru.job4j.html;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -87,5 +88,18 @@ public class SqlRuPost implements Post {
     @Override
     public int hashCode() {
         return Objects.hash(url);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append(this.url).append(System.lineSeparator());
+        result.append(new Date(this.createDate)).append(System.lineSeparator());
+        result.append(this.author).append(System.lineSeparator());
+        result.append(this.summary).append(System.lineSeparator());
+        result.append(this.description).append(System.lineSeparator());
+        result.append(new Date(this.lastUpdateDate)).append(System.lineSeparator());
+        result.append(System.lineSeparator());
+        return result.toString();
     }
 }

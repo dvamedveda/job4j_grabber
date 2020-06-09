@@ -2,9 +2,7 @@ package ru.job4j.store;
 
 import org.junit.Assert;
 import org.junit.Test;
-import ru.job4j.html.Parse;
 import ru.job4j.html.Post;
-import ru.job4j.html.SqlRuParse;
 import ru.job4j.html.SqlRuPost;
 import ru.job4j.quartz.Config;
 
@@ -25,10 +23,24 @@ public class PgSqlStoreTest {
     @Test
     public void whenSavePostListAndGetAllThenCorrect() {
         Properties config = Config.loadProperties("test_db.properties");
-        Parse parser = new SqlRuParse();
         List<Post> posts = new ArrayList<>();
         List<Post> result = new ArrayList<>();
-        posts.addAll(parser.list("https://www.sql.ru/forum/job-offers/1"));
+        Post postOne = new SqlRuPost();
+        postOne.setUrl("url1");
+        postOne.setAuthor("author1");
+        postOne.setSummary("summary1");
+        postOne.setDescription("description1");
+        postOne.setCreateDate(12345L);
+        postOne.setLastUpdateDate(54321L);
+        Post postTwo = new SqlRuPost();
+        postTwo.setUrl("url2");
+        postTwo.setAuthor("author2");
+        postTwo.setSummary("summary2");
+        postTwo.setDescription("description2");
+        postTwo.setCreateDate(54321L);
+        postTwo.setLastUpdateDate(12345L);
+        posts.add(postOne);
+        posts.add(postTwo);
         try (PgSqlStore store = new PgSqlStore(config, false)) {
             for (Post post : posts) {
                 store.save(post);
@@ -37,13 +49,11 @@ public class PgSqlStoreTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Assert.assertThat(result.size(), is(53));
-        Assert.assertThat(result.get(0).getUrl(), is("https://www.sql.ru/forum/484798/pravila-foruma"));
-        Assert.assertThat(result.get(0).getSummary(), is("Правила форума"));
-        Assert.assertThat(result.get(0).getAuthor(), is("judge"));
-        Assert.assertThat(result.get(0).getDescription(), is("Правилами форума временно считаются "
-                + "правила форума Работа связанные с публикацией вакансий. "
-                + "Сообщение было отредактировано: 17 окт 07, 11:30"));
+        Assert.assertThat(result.size(), is(2));
+        Assert.assertThat(result.get(0).getUrl(), is("url1"));
+        Assert.assertThat(result.get(0).getSummary(), is("summary1"));
+        Assert.assertThat(result.get(0).getAuthor(), is("author1"));
+        Assert.assertThat(result.get(0).getDescription(), is("description1"));
     }
 
     /**
