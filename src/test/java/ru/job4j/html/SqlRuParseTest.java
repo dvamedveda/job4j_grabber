@@ -85,7 +85,7 @@ public class SqlRuParseTest {
     public void whenGetPostFromTopicThenGetCorrect() {
         SqlRuParse parser = new SqlRuParse();
         List<Post> posts = new ArrayList<>(parser.list("https://www.sql.ru/forum/job-offers/1"));
-        Post post = posts.get(0);
+        Post post = posts.get(1);
         String expectedUrl = "https://www.sql.ru/forum/484798/pravila-foruma";
         String expectedAuthor = "judge";
         String expectedSummary = "Правила форума";
